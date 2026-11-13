@@ -104,6 +104,7 @@ h1{font-family:Georgia,"Noto Serif SC",serif; color:var(--teal2); font-size:26px
 }
 .opt:hover{border-color:var(--teal); background:#f4faf7;}
 .opt.correct{border-color:var(--ok); background:var(--okbg); font-weight:700;}
+.optTag{display:inline-block; min-width:26px; margin-right:6px; font-weight:800; color:var(--teal2);}
 .opt.wrong{border-color:var(--no); background:var(--nobg); opacity:.65; text-decoration:line-through;}
 .opt.small{font-size:14px; padding:10px 13px;}
 .feedback{border-radius:12px; padding:12px 14px; font-size:14.5px; line-height:1.6; margin-bottom:12px;}
@@ -945,10 +946,13 @@ function renderP1(){
     ? "<b class='big'>"+w.en+"</b><span class='hint'>Choose the Chinese meaning 👇</span>"
     : "<b class='big'>"+w.zh+"</b><span class='hint'>Choose the English word 👇</span>";
   const box=$("qOpts"); box.innerHTML="";
-  it.opts.forEach(o=>{
+  it.opts.forEach((o,i)=>{
     const t= it.dir==="en2zh"? o.zh : o.en;
     const b=document.createElement("button");
-    b.className="opt"; b.textContent=t;
+    b.className="opt";
+    const tag=document.createElement("span");
+    tag.className="optTag"; tag.textContent=String.fromCharCode(65+i)+".";
+    b.appendChild(tag); b.appendChild(document.createTextNode(t));
     b.onclick=()=>answerP1(it,b,o);
     box.appendChild(b);
   });
@@ -973,8 +977,10 @@ function answerP1(it,btn,chosen){
     b.disabled=true;
     if(it.opts[i]===w)b.classList.add("correct");
   });
+  const ci=[...$("qOpts").children].findIndex(b=>b.classList.contains("correct"));
+  const cl=String.fromCharCode(65+ci);
   const fb=$("qFb"); fb.className="feedback ok";
-  fb.innerHTML="🎉 Correct! +10 pts <button class='speak' id='btnP1Listen'>🔊 Listen</button><div class='hint'><b>"+w.en+"</b> — "+w.hint+"</div>";
+  fb.innerHTML="🎉 Correct! <b>Option "+cl+"</b> is the answer · +10 pts <button class='speak' id='btnP1Listen'>🔊 Listen</button><div class='hint'><b>"+w.en+"</b> — "+w.hint+"</div>";
   $("btnP1Listen").onclick=()=>speakUS(w.en,0.95);
   if(it.dir==="zh2en")speakUS(w.en,0.95);
   updateScoreUI();
@@ -1137,7 +1143,10 @@ function renderQ(){
   const box=$("qOpts"); box.innerHTML="";
   q.o.forEach((t,i)=>{
     const b=document.createElement("button");
-    b.className="opt"; b.textContent=t;
+    b.className="opt";
+    const tag=document.createElement("span");
+    tag.className="optTag"; tag.textContent=String.fromCharCode(65+i)+".";
+    b.appendChild(tag); b.appendChild(document.createTextNode(t));
     b.onclick=()=>answerQ(q,b,i);
     box.appendChild(b);
   });
@@ -1164,9 +1173,11 @@ function answerQ(q,btn,idx){
     b.disabled=true;
     if(i===q.a)b.classList.add("correct");
   });
+  const ci=[...$("qOpts").children].findIndex(b=>b.classList.contains("correct"));
+  const cl=String.fromCharCode(65+ci);
   const fb=$("qFb"); fb.className="feedback ok";
   const sent=(curPart===2?q.o[q.a]:fullSentence(q));
-  fb.innerHTML="🎉 Correct! +10 pts <button class='speak' id='btnSent'>🔊 Listen</button> <button class='speak' id='btnMic'>🎤 Read it</button><div class='hint'><b>"+sent+"</b><br>"+q.exp+"</div><div id='micFb'></div>";
+  fb.innerHTML="🎉 Correct! <b>Option "+cl+"</b> is the answer · +10 pts <button class='speak' id='btnSent'>🔊 Listen</button> <button class='speak' id='btnMic'>🎤 Read it</button><div class='hint'><b>"+sent+"</b><br>"+q.exp+"</div><div id='micFb'></div>";
   $("btnSent").onclick=()=>toggleSentenceAudio(sent);
   $("btnMic").onclick=()=>micRead(q,sent);
   updateScoreUI();
