@@ -157,7 +157,6 @@ h1{font-family:Georgia,"Noto Serif SC",serif; color:var(--teal2); font-size:26px
   padding:13px 15px; font-size:14.5px; line-height:1.85; margin-bottom:12px;
   font-family:Georgia,serif;
 }
-.builtline{margin-bottom:4px;}
 .szcard{background:linear-gradient(135deg,#fdf6e3,#f3e6c4); border:1.5px solid var(--gold);
   border-radius:14px; padding:16px 18px; margin-bottom:16px; line-height:1.9; font-size:14.5px;}
 .szcard h3{color:#8a6d1a; font-size:16px; margin-bottom:6px;}
@@ -223,7 +222,6 @@ h1{font-size:40px;}
 .chips{gap:11px;}
 .chip{font-size:17px; padding:15px 18px;}
 .script{font-size:17.5px; line-height:1.95; padding:20px 22px;}
-.builtline{font-size:17px; margin-bottom:6px;}
 .sumbox{font-size:16.5px; padding:14px 18px;}
 .sumbox h4{font-size:17px;}
 .sumbox .pat{font-size:16.5px; margin:5px 0;}
@@ -415,7 +413,6 @@ h1{font-size:40px;}
   <div id="ambBuild" class="hidden">
     <div class="sdesc" id="ambIntro"></div>
     <div class="chips" id="ambChips"></div>
-    <div class="script" id="ambScript"></div>
     <div class="feedback" id="ambFb"></div>
     <div id="ambSummary" class="sumbox hidden"></div>
     <div id="ambSpeakZone" class="hidden">
@@ -1222,7 +1219,6 @@ function pickCard(i){
   $("ambBuild").classList.remove("hidden");
   $("ambTitle").textContent="Part 4 · "+amb.card.name;
   $("ambIntro").innerHTML="Tap the sentence cards below in the right order — opening → history → style → function → today → closing (check the step hints in each sentence). When your speech is complete, review the summary and say it out loud!";
-  $("ambScript").innerHTML="";
   $("ambFb").className="feedback"; $("ambFb").innerHTML="";
   $("ambSummary").classList.add("hidden");
   $("ambSpeakZone").classList.add("hidden");
@@ -1239,10 +1235,6 @@ function pickCard(i){
         const ord=document.createElement("span");       // 卡片上的序号徽章
         ord.className="ordBadge"; ord.textContent=amb.built;
         b.insertBefore(ord,b.firstChild);
-        const li=document.createElement("div");
-        li.className="builtline";
-        li.textContent=amb.built+". "+p.t;
-        $("ambScript").appendChild(li);
         $("ambFb").className="feedback";
         $("ambFb").innerHTML="✅ "+amb.built+" / 6 in place…";
         if(amb.built>=6){
