@@ -145,7 +145,10 @@ h1{font-family:Georgia,"Noto Serif SC",serif; color:var(--teal2); font-size:26px
   padding:11px 13px; font-size:14px; cursor:pointer; line-height:1.5; transition:all .15s;
 }
 .chip:hover{border-color:var(--teal);}
-.chip.good{border-color:var(--ok); background:var(--okbg); opacity:.75;}
+.chip.good{border-color:var(--ok); background:var(--okbg); opacity:.85;}
+.ordBadge{display:inline-block; min-width:22px; height:22px; line-height:22px; text-align:center;
+  border-radius:50%; background:var(--ok); color:#fff; font-weight:800; font-size:13px;
+  margin-right:8px; vertical-align:middle; flex-shrink:0;}
 .chip.good::before{content:"✔ "; color:var(--ok); font-weight:900;}
 .chip.bad{border-color:var(--no); background:var(--nobg); opacity:.6; text-decoration:line-through;}
 .chip.bad::before{content:"✘ "; color:var(--no); font-weight:900;}
@@ -1239,6 +1242,9 @@ function pickCard(i){
       if(p.t===amb.card.need[amb.built]){
         b.disabled=true; b.classList.add("good");
         amb.built++;
+        const ord=document.createElement("span");       // 卡片上的序号徽章
+        ord.className="ordBadge"; ord.textContent=amb.built;
+        b.insertBefore(ord,b.firstChild);
         const li=document.createElement("div");
         li.className="builtline";
         li.textContent=amb.built+". "+p.t;
