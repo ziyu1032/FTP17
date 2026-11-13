@@ -117,7 +117,8 @@ h1{font-family:Georgia,"Noto Serif SC",serif; color:var(--teal2); font-size:26px
 .timer{margin:4px 0 12px;}
 .ttrack{height:10px; background:#efe6d2; border-radius:999px; overflow:hidden;}
 .tfill{height:100%; width:100%; background:linear-gradient(90deg,var(--teal),var(--gold)); transition:width .25s linear;}
-.tlabel{font-size:12px; color:var(--muted); margin-top:4px; text-align:right;}
+.tlabel{font-size:30px; font-weight:800; color:var(--teal2); margin-top:4px; text-align:center; font-variant-numeric:tabular-nums; letter-spacing:1px;}
+.tlabel .tunit{font-size:14px; font-weight:700; color:var(--muted); margin-left:2px;}
 .stageicon{font-size:40px; text-align:center; margin:4px 0;}
 .stitle{font-family:Georgia,serif; font-size:21px; color:var(--teal2); text-align:center; margin-bottom:8px;}
 .sdesc{text-align:center; color:#5a5344; font-size:14.5px; line-height:1.8; margin-bottom:16px;}
@@ -987,7 +988,7 @@ function startPart1(){
   p1Timer=setInterval(()=>{
     const rem=Math.max(0,(p1End-Date.now())/1000);
     $("timerFill").style.width=(rem/PART1_TIME*100)+"%";
-    $("timerLabel").textContent=Math.ceil(rem)+"s";
+    const n=Math.ceil(rem); $("timerLabel").innerHTML=n+'<span class="tunit">s</span>';
     if(rem<=0){clearInterval(p1Timer);endPart1(true);}
   },250);
   renderP1();
