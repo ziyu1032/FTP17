@@ -422,7 +422,7 @@ h1{font-size:23px;}
     <button class="btn small ghost" id="swCenter" onclick="switchAmb(1)">🌆 Hainan Center</button>
   </div>
   <div id="ambPick">
-    <div class="sdesc">Choose the landmark you want to introduce 👇<br><span class="hint" style="text-align:center;">Then pick the 6 sentences that build your one-minute tour guide speech.</span></div>
+    <div class="sdesc">Choose the landmark you want to introduce 👇<br><span class="hint" style="text-align:center;">Then put all the sentences in the right order to build your one-minute speech.</span></div>
     <div id="ambCards"></div>
   </div>
   <div id="ambBuild" class="hidden">
@@ -436,7 +436,7 @@ h1{font-size:23px;}
         <button class="btn small" id="btnAmbRec">🎤 Speak for 1 min</button>
         <button class="btn small ghost" id="btnAmbSkip">🏁 Finish &amp; see results</button>
       </div>
-      <button class="btn small ghost" id="btnAmbScript" style="width:100%; margin-top:8px;">📄 View the full script</button>
+      <button class="btn small ghost hidden" id="btnAmbScript" style="width:100%; margin-top:8px;">📄 View the full script</button>
       <div class="scriptbox hidden" id="ambScriptBox"></div>
       <div class="feedback" id="ambSpFb"></div>
     </div>
@@ -476,12 +476,30 @@ h1{font-size:23px;}
 "use strict";
 /* ================= tools ================= */
 const $=id=>document.getElementById(id);
+function scriptReady(){
+  try{return !!(amb&&amb.card&&amb.built>=amb.card.need.length);}catch(e){return false;}
+}
+/* only when all 6 sentences are placed does the script button appear */
+function syncScriptUI(screenId){
+  const ready=scriptReady();
+  const onScreen=(screenId!==undefined)?(screenId==="screen-amb"):!!($("screen-amb")&&!$("screen-amb").classList.contains("hidden"));
+  const navS=$("navScript");
+  if(navS)navS.classList.toggle("hidden",!(ready&&onScreen));
+  const bt=$("btnAmbScript");
+  if(bt){
+    bt.classList.toggle("hidden",!ready);
+    if(!ready){
+      bt.textContent="📄 View the full script";
+      const box=$("ambScriptBox"); if(box){box.classList.add("hidden"); box.textContent="";}
+    }
+  }
+  if(!ready){const md=$("scriptModal"); if(md)md.classList.add("hidden");}
+}
 const SCREENS=["screen-start","screen-stage","screen-pickb","screen-quiz","screen-partend","screen-amb","screen-result"];
 function show(id){
   SCREENS.forEach(s=>$(s).classList.toggle("hidden",s!==id));
   $("navRestart").classList.toggle("hidden",id==="screen-start"||id==="screen-result");
-  const navS=$("navScript");
-  if(navS)navS.classList.toggle("hidden", !(id==="screen-amb"&&amb&&amb.card&&amb.built>=amb.card.need.length));
+  syncScriptUI(id);
   window.scrollTo(0,0);
 }
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
@@ -894,7 +912,7 @@ function enterPart(i){
   if(i===0){show("screen-quiz");startPart1();}
   else if(i===1){show("screen-quiz");qList=FILL.map(shuffleOpts);qIdx=0;renderQ();}
   else if(i===2){show("screen-pickb");buildStructPick();}
-  else if(i===3){show("screen-amb");ambReset();}
+  else if(i===3){ambReset();show("screen-amb");}
   updateScoreUI();
 }
 function buildStructPick(){
@@ -949,7 +967,7 @@ function openPicker(){
   $("picker").classList.remove("hidden");
 }
 function openScriptModal(){
-  if(!amb||!amb.card)return;
+  if(!scriptReady())return;
   $("scriptModalTitle").textContent="📄 "+amb.card.name+" — full script";
   $("scriptModalBody").textContent=amb.card.need.join(" ");
   $("scriptModal").classList.remove("hidden");
@@ -1279,6 +1297,8 @@ function ambReset(){
   $("ambPick").classList.remove("hidden");
   $("ambBuild").classList.add("hidden");
   $("ambTitle").textContent="Part 4 · Tour Guide";
+  $("ambSpeakZone").classList.add("hidden");
+  $("ambSummary").classList.add("hidden");
   const box=$("ambCards"); box.innerHTML="";
   AMB.forEach((c,i)=>{
     const b=document.createElement("button");
@@ -1287,6 +1307,7 @@ function ambReset(){
     b.onclick=()=>pickCard(i);
     box.appendChild(b);
   });
+  syncScriptUI();
 }
 function switchAmb(i){
   try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
@@ -1299,13 +1320,13 @@ function pickCard(i){
   $("ambPick").classList.add("hidden");
   $("ambBuild").classList.remove("hidden");
   $("ambTitle").textContent="Part 4 · "+amb.card.name;
-  $("ambIntro").innerHTML="Tap the sentence cards below in the right order — opening → history → style → function → today → closing (check the step hints in each sentence). When your speech is complete, review the summary and say it out loud!";
+  $("ambIntro").innerHTML="Tap the sentence cards below in the right order — from the opening to the closing (the step hints inside each sentence will help you). Put every card in place; when all of them are in order, the full script appears and you can say it out loud!";
   $("ambFb").className="feedback"; $("ambFb").innerHTML="";
   $("ambSummary").classList.add("hidden");
   $("ambSpeakZone").classList.add("hidden");
   $("ambScriptBox").classList.add("hidden");
   $("btnAmbScript").textContent="📄 View the full script";
-  const navS=$("navScript"); if(navS)navS.classList.add("hidden");
+  syncScriptUI();
   const chips=$("ambChips"); chips.innerHTML="";
   const pool=amb.card.need.map(t=>({t}));
   shuffle(pool).forEach(p=>{
@@ -1319,9 +1340,10 @@ function pickCard(i){
         const ord=document.createElement("span");       // 卡片上的序号徽章
         ord.className="ordBadge"; ord.textContent=amb.built;
         b.insertBefore(ord,b.firstChild);
+        syncScriptUI();
         $("ambFb").className="feedback";
-        $("ambFb").innerHTML="✅ "+amb.built+" / 6 in place…";
-        if(amb.built>=6){
+        $("ambFb").innerHTML="✅ "+amb.built+" / "+amb.card.need.length+" in place…";
+        if(amb.built>=amb.card.need.length){
           if(!amb.needDone){amb.needDone=true;cnt[3]++;}
           $("ambFb").className="feedback ok";
           $("ambFb").innerHTML="🎉 Speech complete — perfect order! Review the patterns & words below, then say it like a real tour guide!";
@@ -1344,7 +1366,7 @@ function pickCard(i){
               $("btnAmbScript").textContent="📄 View the full script";
             }
           };
-          const navS=$("navScript"); if(navS)navS.classList.remove("hidden");
+          syncScriptUI("screen-amb");
           /* 🔊 模型朗读：点一次播放，再点暂停，再点继续 */
           let modelState="idle";
           const setModelBtn=s=>{modelState=s;
