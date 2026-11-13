@@ -670,17 +670,36 @@ function stopSpeech(){
 }
 
 /* ================= speech recognition scoring ================= */
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition||window.mozSpeechRecognition||window.msSpeechRecognition;
+let ACTIVE_REC=null;
 function speechScore(cb){
-  if(!SR){cb(null);return;}
-  let rec;
-  try{rec=new SR();}catch(e){cb(null);return;}
-  rec.lang="en-US"; rec.interimResults=false; rec.maxAlternatives=1;
-  let done=false;
-  rec.onresult=e=>{if(!done){done=true;cb(e.results[0][0].transcript);}};
-  rec.onerror=()=>{if(!done){done=true;cb(null);}};
-  rec.onend=()=>{if(!done){done=true;cb(null);}};
-  try{rec.start();}catch(e){cb(null);}
+  if(!SR){cb(null,{type:"unsupported"});return;}
+  try{if(ACTIVE_REC){ACTIVE_REC.abort();}}catch(e){}
+  ACTIVE_REC=null;
+  const begin=()=>{
+    let rec;
+    try{rec=new SR();}catch(e){cb(null,{type:"unsupported"});return;}
+    rec.lang="en-US"; rec.interimResults=false; rec.continuous=false; rec.maxAlternatives=1;
+    let done=false;
+    const fin=(text,err)=>{if(done)return;done=true;ACTIVE_REC=null;cb(text,err);};
+    rec.onresult=e=>{let t="";try{t=e.results[0][0].transcript;}catch(x){}fin(t||null,null);};
+    rec.onerror=ev=>fin(null,{type:(ev&&ev.error)||"error"});
+    rec.onend=()=>fin(null,{type:"no-speech"});
+    try{rec.start();ACTIVE_REC=rec;}catch(e){fin(null,{type:"start-failed"});}
+  };
+  /* 先用 getUserMedia 拿到权限：微信/QQ 内置浏览器里识别才不会静默失败，
+     同时能把"权限被拒 / 没有麦克风"区分出来 */
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(st=>{
+      try{st.getTracks().forEach(t=>t.stop());}catch(e){}
+      begin();
+    }).catch(err=>{
+      const n=(err&&err.name)||"";
+      cb(null,{type:n==="NotAllowedError"?"not-allowed":(n==="NotFoundError"?"audio-capture":"audio-capture")});
+    });
+  }else{
+    begin();
+  }
 }
 function selfRate(fbEl,cb){
   fbEl.className="feedback";
@@ -868,22 +887,102 @@ function micRead(q,sent){
   const fb=$("micFb"); if(!fb)return;
   stopSpeech();
   fb.className="feedback";
-  fb.innerHTML="\uD83C\uDFA4 Listening\u2026 read the sentence aloud (AI scoring starts when you finish).";
-  speechScore(said=>{
-    if(!said){
-      selfRate(fb,pts=>{
-        fb.className="feedback ok";
-        fb.innerHTML=scoreCard(pts*10,[],q.exp);
-      });
+  fb.innerHTML="🎤 正在听…请现在朗读这句英文 <span class='hint'>Listening — read the sentence aloud now.</span>";
+  speechScore((said,err)=>{
+    if(said){
+      const m=matchScore(said,sentKeys(sent));
+      fb.className="feedback ok";
+      fb.innerHTML=scoreCard(m.score,m.missed,"Read it again slowly and clearly — stress the key words.")
+        +"<div class='hint'>识别到的内容：\""+said+"\"</div>";
       return;
     }
-    const m=matchScore(said,sentKeys(sent));
-    fb.className="feedback ok";
-    fb.innerHTML=scoreCard(m.score,m.missed,"Read it again slowly and clearly \u2014 stress the key words.")
-      +"<div class='hint'>What we heard: "+said+"</div>";
+    micFallback(fb,err,sent,q.exp,()=>micRead(q,sent));
   });
 }
-
+/* 识别不可用时的兜底：说明原因 → 再试一次 / 录音回放自评（不依赖境外服务，一定能用） */
+function micFallback(fb,err,sent,tip,retry){
+  const t=(err&&err.type)||"no-speech";
+  const msg={
+    unsupported:"这个浏览器没有语音识别功能（微信/QQ 内置浏览器、iPhone Safari 常见）。可以直接用「录音回放」练习，对照范文给自己打分。",
+    "not-allowed":"麦克风权限被拒绝。请点地址栏左侧的锁图标允许麦克风，然后点「再试一次」。",
+    "service-not-allowed":"浏览器禁用了语音识别服务，请用 Chrome 打开本页再试。",
+    "audio-capture":"没有检测到麦克风，请检查设备，或换一台手机。",
+    network:"语音识别服务连不上——国内网络访问不了 Chrome 的识别服务器（很常见）。可以先用「录音回放」练，对照范文听自己的重音和停顿。",
+    "no-speech":"没有听到你的声音。靠近麦克风，点「再试一次」后马上开始朗读。",
+    "start-failed":"麦克风启动失败，点「再试一次」。",
+    aborted:"识别被中断了，点「再试一次」。"
+  }[t]||("语音识别失败（"+t+"），可以点「再试一次」。");
+  fb.className="feedback";
+  fb.innerHTML="<b>🎤 AI 识别这次没能用上</b><div class='hint'>"+msg+"</div>";
+  const row=document.createElement("div"); row.className="btnrow"; row.style.marginTop="8px";
+  if(retry){
+    const b1=document.createElement("button");
+    b1.className="btn small indigo"; b1.textContent="🔁 再试一次"; b1.onclick=retry;
+    row.appendChild(b1);
+  }
+  const b2=document.createElement("button");
+  b2.className="btn small"; b2.textContent="🎧 录音回放";
+  b2.onclick=()=>recordPractice(fb,sent,tip);
+  row.appendChild(b2);
+  fb.appendChild(row);
+}
+function recordPractice(fb,sent,tip){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia||!window.MediaRecorder){
+    fb.className="feedback";
+    fb.innerHTML="<b>🎤 无法录音</b><div class='hint'>这个浏览器不支持麦克风录音，请换 Chrome 打开本页。</div>";
+    return;
+  }
+  fb.className="feedback";
+  fb.innerHTML="🎙 正在打开麦克风…";
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    let chunks=[];
+    let mr;
+    try{mr=new MediaRecorder(stream);}catch(e){
+      fb.innerHTML="<b>🎤 无法录音</b><div class='hint'>这台设备不支持网页录音，请换 Chrome。</div>";
+      return;
+    }
+    mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+    mr.onstop=()=>{
+      try{stream.getTracks().forEach(t=>t.stop());}catch(e){}
+      const type=(chunks[0]&&chunks[0].type)||"audio/webm";
+      const url=URL.createObjectURL(new Blob(chunks,{type:type}));
+      fb.className="feedback";
+      fb.innerHTML="<b>🎧 你的录音</b><div class='hint'>先回放自己的，再点「🔊 听范文」对比重音和停顿，然后自评。</div>";
+      const au=document.createElement("audio");
+      au.controls=true; au.src=url; au.style.width="100%"; au.style.marginTop="6px";
+      fb.appendChild(au);
+      if(sent&&AUDIO[sent]){
+        const lb=document.createElement("button");
+        lb.className="btn small indigo"; lb.textContent="🔊 听范文"; lb.style.marginTop="6px";
+        lb.onclick=()=>playClip(sent);
+        fb.appendChild(lb);
+      }
+      const row=document.createElement("div"); row.className="btnrow"; row.style.marginTop="6px";
+      [["读得不错 👍",10],["比较流利 🙂",7],["需要多练 💪",4]].forEach(p=>{
+        const b=document.createElement("button");
+        b.className="btn small ghost"; b.textContent=p[0]+" +"+p[1];
+        b.onclick=()=>{fb.className="feedback ok"; fb.innerHTML=scoreCard(p[1]*10,[],tip||"多跟读范文，注意句子重音和停顿。");};
+        row.appendChild(b);
+      });
+      fb.appendChild(row);
+    };
+    try{mr.start();}catch(e){}
+    fb.className="feedback";
+    fb.innerHTML="🔴 正在录音…读完点下面的按钮。<span class='hint'>Recording — read the sentence aloud.</span>";
+    const stop=document.createElement("button");
+    stop.className="btn small"; stop.textContent="⏹ 停止并回放"; stop.style.marginTop="6px";
+    stop.onclick=()=>{try{mr.stop();}catch(e){}};
+    fb.appendChild(stop);
+    setTimeout(()=>{try{if(mr.state==="recording")mr.stop();}catch(e){}},30000);
+  }).catch(err=>{
+    const n=(err&&err.name)||"";
+    fb.className="feedback";
+    fb.innerHTML="<b>🎤 麦克风打不开</b><div class='hint'>"+
+      (n==="NotAllowedError"?"权限被拒绝：请在浏览器设置里允许本页使用麦克风。"
+        :n==="NotFoundError"?"没有检测到麦克风设备。"
+        :"麦克风可能被其他应用占用，请关闭后重试。")+"</div>";
+  });
+}
 /* ---------- Part 2/3 quiz ---------- */
 function renderQ(){
   locked=false;
@@ -1004,14 +1103,11 @@ function pickCard(i){
           $("btnAmbRec").onclick=()=>{
             $("ambSpFb").className="feedback";
             $("ambSpFb").innerHTML="🎤 Listening... deliver your tour guide speech now!";
-            speechScore(said=>{
-              if(said==null){
-                selfRate($("ambSpFb"),pts=>{
-                  if(!amb.spoke){amb.spoke=true;cnt[3]++;}
-                  $("ambSpFb").className="feedback ok";
-                  $("ambSpFb").innerHTML=scoreCard(pts*10,[],"Remember the five steps: Opening → History → Features → Function → Significance, then invite your guests!");
-                  updateScoreUI();
-                });
+            speechScore((said,err)=>{
+              if(!said){
+                if(!amb.spoke){amb.spoke=true;cnt[3]++;}
+                micFallback($("ambSpFb"),err,"", "Remember the five steps: Opening → History → Features → Function → Significance, then invite your guests.",null);
+                updateScoreUI();
                 return;
               }
               if(!amb.spoke){amb.spoke=true;cnt[3]++;}
