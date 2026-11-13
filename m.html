@@ -67,7 +67,9 @@ h1{font-family:Georgia,"Noto Serif SC",serif; color:var(--teal2); font-size:26px
 .sumbox{background:#f6efe0; border:1px dashed #a95a33; border-radius:12px; padding:10px 14px; margin-top:10px; font-size:13.5px;}
 .sumbox h4{margin:4px 0 6px; color:#a95a33; font-size:14px;}
 .sumbox .pat{margin:3px 0; padding-left:6px;}
-.sumbox .wchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;}
+.sumbox .scriptbox{text-align:left; background:#fff; border:1.4px solid var(--line); border-radius:12px;
+  padding:12px 14px; margin-top:8px; font-size:15px; line-height:1.8; color:var(--ink);}
+.wchips{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;}
 .sumbox .wchip{background:#fff; border:1px solid #c9a227; border-radius:20px; padding:2px 10px; font-size:12.5px;}
 .pl b{color:var(--teal2);}
 .szbox{
@@ -427,6 +429,8 @@ h1{font-size:23px;}
         <button class="btn small" id="btnAmbRec">🎤 Speak for 1 min</button>
         <button class="btn small ghost" id="btnAmbSkip">🏁 Finish &amp; see results</button>
       </div>
+      <button class="btn small ghost" id="btnAmbScript" style="width:100%; margin-top:8px;">📄 View the full script</button>
+      <div class="scriptbox hidden" id="ambScriptBox"></div>
       <div class="feedback" id="ambSpFb"></div>
     </div>
   </div>
@@ -1228,6 +1232,8 @@ function pickCard(i){
   $("ambFb").className="feedback"; $("ambFb").innerHTML="";
   $("ambSummary").classList.add("hidden");
   $("ambSpeakZone").classList.add("hidden");
+  $("ambScriptBox").classList.add("hidden");
+  $("btnAmbScript").textContent="📄 View the full script";
   const chips=$("ambChips"); chips.innerHTML="";
   const pool=amb.card.need.map(t=>({t}));
   shuffle(pool).forEach(p=>{
@@ -1255,6 +1261,17 @@ function pickCard(i){
           updateScoreUI();
           $("ambSpeakZone").classList.remove("hidden");
           const full=amb.card.need.join(" ");
+          $("btnAmbScript").onclick=()=>{
+            const box=$("ambScriptBox");
+            if(box.classList.contains("hidden")){
+              box.textContent=full;
+              box.classList.remove("hidden");
+              $("btnAmbScript").textContent="🙈 Hide the script";
+            }else{
+              box.classList.add("hidden");
+              $("btnAmbScript").textContent="📄 View the full script";
+            }
+          };
           $("btnAmbModel").onclick=()=>speakUS(full,0.92);
           $("btnAmbRec").onclick=()=>{
             $("ambSpFb").className="feedback";
