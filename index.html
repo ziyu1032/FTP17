@@ -512,56 +512,56 @@ const QUEST={
     "s": "You are introducing QILOU. Which sentence works best as the OPENING (Location)?",
     "o": [
      "Hainan's Qilou is a living reminder of Hainan's maritime history.",
-     "Hainan Center is a modern skyscraper in Haikou.",
      "These buildings blend Chinese, Western, and Southeast Asian architectural styles.",
+     "Ground-floor arcades provide shade and shelter from rain.",
      "Qilou stands as a guardian of history, keeping a hundred years of stories alive."
     ],
     "a": 0,
-    "exp": "Step 1 · Location: X is / is mainly found in + place, plus a hint of what it is. Option 2 opens HAINAN CENTER correctly — right step, wrong building."
+    "exp": "Step 1 · Location: X is / is mainly found in + place, plus a hint of what it is. The other three are Features, Function and Significance — they come later."
    },
    {
     "s": "You are introducing QILOU. Which sentence tells its HISTORY?",
     "o": [
      "Many of the surviving Qilou buildings were constructed from the late 19th to the early 20th centuries.",
-     "Hainan Center was planned as a new landmark to showcase the Hainan Free Trade Port.",
+     "Upper floors often feature Western-style decorative elements.",
      "Ground-floor arcades provide shade and shelter from rain.",
-     "At 428 meters, Hainan Center is set to become the tallest building in Hainan."
+     "Qilou stands as a guardian of history, keeping a hundred years of stories alive."
     ],
     "a": 0,
-    "exp": "Step 2 · History: was constructed / were built + a time phrase. Hainan Center was only PLANNED — a new tower has no century of history, so it never takes this step."
+    "exp": "Step 2 · History: was constructed / were built + a time phrase. Only this sentence answers 'how old is it?'"
    },
    {
     "s": "You are introducing QILOU. Which sentence describes its FEATURES (what it looks like)?",
     "o": [
      "These buildings blend Chinese, Western, and Southeast Asian architectural styles.",
-     "Its glass facade shines in the sun, and its unique design looks like it is reaching for the sky.",
-     "It was once a busy commercial district linked to local and overseas trade.",
-     "From the observation deck, you can see the whole city and the sea."
+     "Many of the surviving buildings were constructed a century ago.",
+     "Ground-floor arcades provide shade and shelter from rain.",
+     "Qilou stands as a guardian of history, keeping a hundred years of stories alive."
     ],
     "a": 0,
-    "exp": "Step 3 · Features: blend ... styles / feature + decorative elements. The glass-facade option describes the CENTER — same slot, different materials and vocabulary."
+    "exp": "Step 3 · Features: blend ... styles / feature + decorative elements — describing the LOOK of the buildings."
    },
    {
     "s": "You are introducing QILOU. Which sentence tells its FUNCTION (what it does for people)?",
     "o": [
      "Ground-floor arcades provide shade and shelter from rain.",
-     "From the observation deck, you can see the whole city and the sea.",
-     "Many of the surviving buildings were constructed a century ago.",
-     "It is 428 meters high."
+     "Long ago, this street was a busy commercial district, linking local and overseas trade.",
+     "Upper floors often feature Western-style decorative elements.",
+     "Qilou stands as a guardian of history, keeping a hundred years of stories alive."
     ],
     "a": 0,
-    "exp": "Step 4 · Function: provide + noun / keep you cool and dry. Qilou shelters people on the street; the Center's function is offices, a hotel and a view."
+    "exp": "Step 4 · Function: provide + noun / keep you cool and dry — what the building DOES for people, not what it looks like or how old it is."
    },
    {
     "s": "You are introducing QILOU. Which sentence expresses its SIGNIFICANCE?",
     "o": [
      "Qilou stands as a guardian of history, keeping a hundred years of stories alive.",
-     "Hainan Center stands as a symbol of Hainan's contemporary development.",
-     "It is 428 meters high.",
-     "Inside, you'll find offices, a luxury hotel, shops, and an observation deck."
+     "Ground-floor arcades provide shade and shelter from rain.",
+     "Many of the surviving buildings were constructed a century ago.",
+     "These buildings blend Chinese, Western, and Southeast Asian architectural styles."
     ],
     "a": 0,
-    "exp": "Step 5 · Significance: stand as a guardian of history / stand as a symbol of ... Option 2 is the CENTER's significance — same pattern, other building."
+    "exp": "Step 5 · Significance: stand as a guardian of history / stand as a symbol of ... — the big meaning, saved for the end."
    },
    {
     "s": "You are introducing QILOU. Which sentence should come FIRST?",
@@ -575,23 +575,23 @@ const QUEST={
     "exp": "Order: Location → History → Features → Function → Significance. Place it and say what it is first; save the 'guardian of history' line for the end."
    },
    {
-    "s": "Which sentence draws a CONTRAST between the old street and the new tower?",
+    "s": "Which sentence uses the PASSIVE VOICE to tell Qilou's history?",
     "o": [
-     "The Center creates a striking contrast with Haikou's historic Qilou architecture.",
-     "It provides shade from rain.",
-     "It is in Haikou.",
-     "It was built in the 1900s."
+     "Many of the surviving Qilou buildings were constructed from the late 19th to the early 20th centuries.",
+     "Ground-floor arcades provide shade and shelter from rain.",
+     "These buildings blend three architectural styles.",
+     "Qilou stands as a guardian of history."
     ],
     "a": 0,
-    "exp": "create a striking contrast with ... — the classic pattern for comparing old and new. Useful in both introductions."
+    "exp": "Passive voice: be + constructed / built + time. It is the classic pattern for the History step of a historic building."
    },
    {
     "s": "Which is the best CLOSING sentence for an introduction of BOTH landmarks together?",
     "o": [
      "Together, these two landmarks paint a vivid picture of Hainan's evolving identity.",
-     "It is 428 meters tall.",
      "Ground-floor arcades keep you dry in the rain.",
-     "Hainan Center is a modern skyscraper."
+     "Many of the surviving buildings were constructed a century ago.",
+     "Hainan's Qilou is a living reminder of maritime history."
     ],
     "a": 0,
     "exp": "Closing: paint a vivid picture of ... / where tradition and modernity embrace each other — lift the ending to a bigger meaning."
@@ -601,11 +601,11 @@ const QUEST={
     "o": [
      "Features — the architectural style and decorations of the building.",
      "Location — where the building stands.",
-     "Purpose — why the building was planned.",
+     "Function — what it does for people.",
      "Significance — why it matters today."
     ],
     "a": 0,
-    "exp": "Qilou structure: Location → History → Features → Function → Significance. History answers 'how old'; Features answers 'what it looks like'. Purpose belongs to the modern tower, not to Qilou."
+    "exp": "Qilou structure: Location → History → Features → Function → Significance. History answers 'how old'; Features answers 'what it looks like'."
    }
   ]
  },
@@ -619,56 +619,56 @@ const QUEST={
     "s": "You are introducing HAINAN CENTER. Which sentence works best as the OPENING (Location & what it is)?",
     "o": [
      "Hainan Center is a modern skyscraper in Haikou.",
-     "Hainan's Qilou is a living reminder of Hainan's maritime history.",
      "At 428 meters, it is set to become the tallest building in Hainan.",
+     "It was planned as a new landmark to showcase the Free Trade Port.",
      "It stands as a symbol of Hainan's contemporary development."
     ],
     "a": 0,
-    "exp": "Step 1 · Location: X is + a modern skyscraper + in Haikou. Height and meaning come later — open with what it is and where it is."
+    "exp": "Step 1 · Location: X is + a modern skyscraper + in Haikou. Purpose, height and meaning all come later."
    },
    {
     "s": "You are introducing HAINAN CENTER. Which sentence explains its PURPOSE (why it was built)?",
     "o": [
      "Hainan Center was planned as a new landmark to showcase the Hainan Free Trade Port.",
-     "Many of the surviving Qilou buildings were constructed from the late 19th to the early 20th centuries.",
-     "Ground-floor arcades provide shade and shelter from rain.",
-     "Its glass facade shines in the sun."
+     "Inside, you'll find offices, a luxury hotel, shops, and an observation deck.",
+     "Its glass facade and unique design make it stand out.",
+     "From the observation deck, you can see the whole city and the sea."
     ],
     "a": 0,
-    "exp": "Step 2 · Purpose (NOT History!): was planned / was designed to + reason. A new tower has no century of stories — explain why it was built. Option 2 is Qilou's history step."
+    "exp": "Step 2 · Purpose (NOT History!): was planned / was designed to + reason. A new tower has no century of stories — explain WHY it was built."
    },
    {
     "s": "You are introducing HAINAN CENTER. Which sentence describes its DESIGN & HEIGHT?",
     "o": [
      "Its glass facade and unique design make it stand out, and at 428 meters it is set to become the tallest building in Hainan.",
-     "These buildings blend Chinese, Western, and Southeast Asian architectural styles.",
-     "Many of the surviving buildings were constructed a century ago.",
-     "Inside, you'll find offices, a luxury hotel, shops, and an observation deck."
+     "Hainan Center was planned as a new landmark.",
+     "From the observation deck, you can see the whole city and the sea.",
+     "It boosts regional business and tourism."
     ],
     "a": 0,
-    "exp": "Step 3 · Design & Height: material (glass facade) + shape (unique design) + number (at 428 meters). Qilou's design step talks about mixed styles instead."
+    "exp": "Step 3 · Design & Height: material (glass facade) + shape (unique design) + number (at 428 meters) — how it LOOKS and how TALL it is."
    },
    {
     "s": "You are introducing HAINAN CENTER. Which sentence tells its FUNCTION — what you can do inside?",
     "o": [
      "Inside, you'll find offices, a luxury hotel, shops, and an observation deck, and from the top you can see the whole city and the sea.",
-     "Ground-floor arcades provide shade and shelter from rain.",
-     "It was planned as a new landmark.",
-     "Its facade symbolizes the Free Trade Port."
+     "At 428 meters, it is set to become the tallest building in Hainan.",
+     "Hainan Center is a modern skyscraper in Haikou.",
+     "Its modern facade and distinctive structural design symbolize the development of the Hainan Free Trade Port."
     ],
     "a": 0,
-    "exp": "Step 4 · Function: inside, you'll find ... / from the top, you can see ... Qilou's function is shade and shelter under the arcades."
+    "exp": "Step 4 · Function: inside, you'll find ... / from the top, you can see ... — the visitor experience, not the look or the meaning."
    },
    {
     "s": "You are introducing HAINAN CENTER. Which sentence expresses its SIGNIFICANCE?",
     "o": [
      "It stands as a symbol of Hainan's contemporary development and a pioneer of the future.",
-     "Qilou stands as a guardian of history, keeping a hundred years of stories alive.",
-     "It is 428 meters high.",
-     "You'll find cafes and snack shops under the arcades."
+     "Its glass facade shines in the sun.",
+     "It was planned as a new landmark.",
+     "From the observation deck, you can see the whole city and the sea."
     ],
     "a": 0,
-    "exp": "Step 5 · Significance: stand as a symbol of + abstract noun / a pioneer of the future. Option 2 uses the same pattern for the wrong building."
+    "exp": "Step 5 · Significance: stand as a symbol of + abstract noun / a pioneer of the future — the big meaning, saved for the end."
    },
    {
     "s": "Which step should you SKIP when you introduce HAINAN CENTER?",
@@ -679,18 +679,18 @@ const QUEST={
      "Function — what visitors can do inside."
     ],
     "a": 0,
-    "exp": "The big difference: QILOU = Location → History → Features → Function → Significance, but HAINAN CENTER = Location → Purpose → Design & Height → Function → Significance. A modern landmark has a PURPOSE, not a HISTORY."
+    "exp": "The big difference: QILOU has a History step, but HAINAN CENTER = Location → Purpose → Design & Height → Function → Significance. A modern landmark has a PURPOSE, not a HISTORY."
    },
    {
     "s": "Which sentence draws a CONTRAST between the new tower and the old street?",
     "o": [
      "The Center creates a striking contrast with Haikou's historic Qilou architecture.",
-     "It provides shade from rain.",
-     "It is in Haikou.",
-     "It was built in the 1900s."
+     "It was planned as a new landmark.",
+     "From the observation deck, you can see the whole city and the sea.",
+     "Its glass facade shines in the sun."
     ],
     "a": 0,
-    "exp": "create a striking contrast with ... — the classic pattern for comparing old and new. Useful in both introductions."
+    "exp": "create a striking contrast with ... — the classic pattern for comparing old and new. The subject is the Center, so it fits the CENTER introduction."
    },
    {
     "s": "You are introducing HAINAN CENTER. Which sentence should come FIRST?",
@@ -707,12 +707,12 @@ const QUEST={
     "s": "In a HAINAN CENTER introduction, which step comes right AFTER 'Purpose'?",
     "o": [
      "Design and height — how it looks and how tall it is.",
-     "History — how it was built a century ago.",
      "Location — where it stands.",
+     "Function — what visitors can do inside.",
      "Significance — what it means for Hainan."
     ],
     "a": 0,
-    "exp": "CENTER structure: Location → Purpose → Design & Height → Function → Significance. There is no History step — 'a century ago' simply does not apply to a new tower."
+    "exp": "CENTER structure: Location → Purpose → Design & Height → Function → Significance. There is no History step at all."
    }
   ]
  }
