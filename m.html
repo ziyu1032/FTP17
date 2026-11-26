@@ -415,7 +415,10 @@ h1{font-size:23px;}
   <div class="qprompt" id="qPrompt"></div>
   <div class="opts" id="qOpts"></div>
   <div class="feedback" id="qFb"></div>
-  <button class="btn hidden" id="qNext">Next →</button>
+  <div class="navrow" style="display:flex; gap:10px; justify-content:center; align-items:center; margin-top:12px;">
+    <button class="btn small ghost hidden" id="qPrev">← Previous</button>
+    <button class="btn hidden" id="qNext">Next →</button>
+  </div>
 </section>
 
 <!-- ============ part end ============ -->
@@ -520,7 +523,9 @@ function show(id){
 }
 function shuffle(arr){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
 function shuffleOpts(q){
-  const idx=shuffle(q.o.map((_,i)=>i));
+  /* 每次进入/重开都生成新顺序：Fisher-Yates 打乱；若恰好与原顺序相同则再打乱一次 */
+  let idx=shuffle(q.o.map((_,i)=>i));
+  if(idx.length>2 && idx.every((v,i)=>v===i)) idx=shuffle(idx);
   return Object.assign({},q,{o:idx.map(i=>q.o[i]),a:idx.indexOf(q.a)});
 }
 
@@ -1243,8 +1248,8 @@ function recordPractice(fb,sent,tip){
 }
 /* ---------- Part 2/3 quiz ---------- */
 function renderQ(){
-  locked=false;
   const q=qList[qIdx]; if(!q)return;
+  locked=!!q._done;   /* 返回已答对题时保持锁定，避免重复加分 */
   $("qPart").textContent=(curPart===2?"Part 3 · "+QUEST[structKey].icon+" "+QUEST[structKey].name
     :PARTS[curPart].name)+"  Q"+(qIdx+1)+"/"+qList.length;
   $("qSwitch").style.display=(curPart===2?"flex":"none");
@@ -1262,11 +1267,20 @@ function renderQ(){
     const tag=document.createElement("span");
     tag.className="optTag"; tag.textContent=String.fromCharCode(65+i)+".";
     b.appendChild(tag); b.appendChild(document.createTextNode(t));
+    if(q._done){ b.disabled=true; if(i===q.a) b.classList.add("correct"); }
     b.onclick=()=>answerQ(q,b,i);
     box.appendChild(b);
   });
-  $("qFb").className="feedback"; $("qFb").innerHTML="";
-  $("qNext").classList.add("hidden");
+  if(q._done){                       /* 返回已答题：还原当时的反馈 */
+    $("qFb").className=q._fbClass||"feedback ok";
+    $("qFb").innerHTML=q._fbHtml||"";
+    $("qNext").classList.remove("hidden");
+    bindAnswerBtns();
+  }else{
+    $("qFb").className="feedback"; $("qFb").innerHTML="";
+    $("qNext").classList.add("hidden");
+  }
+  $("qPrev").classList.toggle("hidden", qIdx===0);   /* 第一题无上一题 */
   $("qNext").textContent=(qIdx===qList.length-1)
     ?(curPart===1?"Go to Part 3 →":"Go to Part 4 · Tour Guide →")
     :"Next →";
@@ -1293,10 +1307,17 @@ function answerQ(q,btn,idx){
   const fb=$("qFb"); fb.className="feedback ok";
   const sent=(curPart===2?q.o[q.a]:fullSentence(q));
   fb.innerHTML="🎉 Correct! <b>Option "+cl+"</b> is the answer · +10 pts <button class='speak' id='btnSent'>🔊 Listen</button> <button class='speak' id='btnMic'>🎤 Read it</button><div class='hint'><b>"+sent+"</b><br>"+q.exp+"</div><div id='micFb'></div>";
-  $("btnSent").onclick=()=>toggleSentenceAudio(sent);
-  $("btnMic").onclick=()=>micRead(q,sent);
+  q._done=true; q._sent=sent; q._fbClass=fb.className; q._fbHtml=fb.innerHTML;  /* 供返回本题时还原 */
+  bindAnswerBtns();
   updateScoreUI();
   $("qNext").classList.remove("hidden");
+}
+/* 重新绑定答对反馈里的两个按钮（首次作答与返回还原都要调用） */
+function bindAnswerBtns(){
+  const q=qList[qIdx]; if(!q||!q._done) return;
+  const sent=q._sent;
+  if($("btnSent")) $("btnSent").onclick=()=>toggleSentenceAudio(sent);
+  if($("btnMic")) $("btnMic").onclick=()=>micRead(q,sent);
 }
 $("qNext").onclick=()=>{
   if(curPart===0){p1Idx++;renderP1();}
@@ -1305,6 +1326,11 @@ $("qNext").onclick=()=>{
     if(qIdx>=qList.length){startPart(curPart+1);}
     else renderQ();
   }
+};
+/* 返回上一小题：仅第2/3关，第一题不显示 */
+$("qPrev").onclick=()=>{
+  if(curPart===0) return;
+  if(qIdx>0){ qIdx--; renderQ(); }
 };
 
 /* ---------- Part 4 tour guide ---------- */
